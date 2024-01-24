@@ -15,7 +15,7 @@ class PodmanQemu < Formula
   # Try to switch to the latest go on the next release
   depends_on "go@1.18" => :build
   on_macos do
-    depends_on "qemu@8.1.3"
+    depends_on "helpshift/homebrew-dependencies/qemu"
   end
   on_linux do
     depends_on "autoconf" => :build
