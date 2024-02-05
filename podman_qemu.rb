@@ -1,4 +1,4 @@
-class Podman < Formula
+class PodmanQemu < Formula
   desc "Tool for managing OCI containers and pods"
   homepage "https://podman.io/"
   url "https://github.com/containers/podman.git",
