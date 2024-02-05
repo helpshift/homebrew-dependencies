@@ -1,22 +1,21 @@
-class PodmanQemu < Formula
+class Podman < Formula
   desc "Tool for managing OCI containers and pods"
   homepage "https://podman.io/"
-  #url "https://github.com/containers/podman/archive/v4.3.0.tar.gz"
-  #sha256 "dc421e3a5560ccf7d0d67fd1b2f45c0dd02636ecaa1eeca49ce950d6633495b0"
   url "https://github.com/containers/podman.git",
-      tag:      "v4.8.0",
-      revision: "c4dfcf14874479e34b3f312f089fc5840e306258"
+      tag:      "v4.8.3",
+      revision: "85dc30df56566a654700722a4dd190e1b9680ee7"
   license all_of: ["Apache-2.0", "GPL-3.0-or-later"]
+  revision 1
   head "https://github.com/containers/podman.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "172534d9bb9aa9864f5bdec1a2e9f427379c27838596f0b2c966fa3a82883e93"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "892183e73b72d2e09776ad2dc7fefaa3b412ebca0f6e05c1fe04833592af6f64"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "15ec062d724716c65e82d6e5fb49ad20393626c336cfb050f90f70d12d515dcd"
-    sha256 cellar: :any_skip_relocation, sonoma:         "ecc7ee5a6a9739f57e7e1c3e72bf5519b333b1bceea21621a34d2c731f9b0794"
-    sha256 cellar: :any_skip_relocation, ventura:        "e024891a40a70bec9684c2f42d0d749dc929e7a2d4c0a3dbe85326692a9faf5b"
-    sha256 cellar: :any_skip_relocation, monterey:       "c54980450b663a45f2aaec1cdac39a99b6a68b610eb488f8c3d21a7aa18ad3ce"
-    sha256                               x86_64_linux:   "a3af8a1ac3a3e5cbd4138e070aa27bd338e1e36c045b388384b68f5e5aedb27e"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5a67c98e2547d8c51442080f3512dc9f60812fd7568eadbffd43b0b48e91e49d"
+    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d6b400d9346fa1c5618f49f1b84596375fba70f34387fb17e8234c907d13a4e7"
+    sha256 cellar: :any_skip_relocation, arm64_monterey: "5cea80226ddda734c5d1280c07479579fabd858dd82569394b5b271778b9f59f"
+    sha256 cellar: :any_skip_relocation, sonoma:         "ab31cf27bae3c73533f9bc6564bd76860dbf5ead263e9248ce56fece3a98edca"
+    sha256 cellar: :any_skip_relocation, ventura:        "87295162ba4f7363940a74d445792b79f72ecb3738f4ee18854eed71f15676d3"
+    sha256 cellar: :any_skip_relocation, monterey:       "662045c6c29eadf23b25be4e436b90c5f8865ba906799de14dea031181d5ef45"
+    sha256                               x86_64_linux:   "0897c304b04fa54b422f0da105dc3ad4c1683a45afb10327467f8f6fd3cc90e3"
   end
 
   depends_on "go" => :build
@@ -48,6 +47,13 @@ class PodmanQemu < Formula
     on_macos do
       url "https://github.com/containers/gvisor-tap-vsock/archive/refs/tags/v0.7.1.tar.gz"
       sha256 "cbc97a44b6ca8f6c427ac58e193aa39c28674e4f1d2af09b5a9e35d1d3bb7fd3"
+    end
+  end
+
+  resource "vfkit" do
+    on_macos do
+      url "https://github.com/crc-org/vfkit/archive/refs/tags/v0.5.0.tar.gz"
+      sha256 "abfc3ca8010aca5bd7cc658680ffaae0a80ba1a180a2b37f9a7c4fce14b8957f"
     end
   end
 
@@ -86,6 +92,15 @@ class PodmanQemu < Formula
       resource("gvproxy").stage do
         system "gmake", "gvproxy"
         (libexec/"podman").install "bin/gvproxy"
+      end
+
+      resource("vfkit").stage do
+        ENV["CGO_ENABLED"] = "1"
+        ENV["CGO_CFLAGS"] = "-mmacosx-version-min=11.0"
+        ENV["GOOS"]="darwin"
+        arch = Hardware::CPU.intel? ? "amd64" : Hardware::CPU.arch.to_s
+        system "gmake", "out/vfkit-#{arch}"
+        (libexec/"podman").install "out/vfkit-#{arch}" => "vfkit"
       end
 
       system "gmake", "podman-remote-darwin-docs"
